@@ -26,34 +26,38 @@ export async function POST(request) {
     return jsonError("Expected JSON body.", 400);
   }
 
-  const { itemId, deliveryAddress } = body;
+  const { itemId, deliveryAddress, itemName, itemImage, price, category, description, location, vendorId, vendorName, status, customerEmail, customerName } = body;
   if (!itemId) {
     return jsonError("Item ID is required.", 400);
   }
 
+  // Verify the item exists and is not the customer's own item (defense in depth).
   const item = await db.collection("menuItems").findOne({ _id: itemId });
   if (!item) {
     return jsonError("Menu item not found.", 404);
   }
 
-  // Vendors cannot order their own items (defense in depth; dialog also guards).
   if (String(item.vendorId) === String(user.id)) {
     return jsonError("You cannot order your own items.", 403);
   }
 
   const order = {
     _id: randomUUID(),
-    vendorId: item.vendorId,
+    vendorId: vendorId || item.vendorId,
     itemId: item._id,
-    itemName: item.name,
-    itemImage: item.image || item.imageUrl,
-    itemPrice: item.price,
-    customerId: user.id,
-    customerName: user.name,
-    customerEmail: user.email,
+    itemName: itemName || item.name,
+    itemImage: itemImage || item.image || item.imageUrl,
+    price: Number(price || item.price || 0),
+    category: category || item.category,
+    description: description || item.description,
+    location: location || item.location,
+    vendorName: vendorName || item.vendorName || item.userName || item.vendor?.name || item.user?.name || "Vendor",
+    customerId: user._id || user.id,
+    customerName: customerName || user.name,
+    customerEmail: customerEmail || user.email,
     deliveryAddress: deliveryAddress || "",
     customerMessage: "",
-    status: "pending",
+    status: status || "Pending",
     createdAt: new Date().toISOString(),
   };
 

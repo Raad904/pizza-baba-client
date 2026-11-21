@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -51,8 +51,6 @@ const renderImage = (src, alt) => {
 export function ItemDetailsDialog({ item }) {
   const router = useRouter();
 
-  const [mounted, setMounted] = useState(false);
-
   const { data: session, isPending } = authClient.useSession();
   const currentUser = session?.user;
 
@@ -61,12 +59,6 @@ export function ItemDetailsDialog({ item }) {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [deliveryAddress, setDeliveryAddress] = useState("");
-
-  useEffect(() => {
-    setMounted(true);
-
-    return () => setMounted(false);
-  }, []);
 
   const images =
     Array.isArray(item?.images) && item.images.length > 0
@@ -99,60 +91,81 @@ export function ItemDetailsDialog({ item }) {
     return { ok: true };
   };
 
-  const handleOrder = async (e) => {
-    e.preventDefault();
+ const handleOrder = async (e) => {
+  e.preventDefault();
 
-    setOrderError("");
-    setOrderSuccess(false);
+  setOrderError("");
+  setOrderSuccess(false);
 
-    const perm = orderPermission();
+  const perm = orderPermission();
 
-    if (!perm.ok) {
-      if (perm.reason === "login") {
-        return setOrderError("Please sign in to place an order.");
-      }
-
-      if (perm.reason === "admin") {
-        return setOrderError("Admins cannot place customer orders.");
-      }
-
-      if (perm.reason === "own") {
-        return setOrderError("You cannot order your own items.");
-      }
-
-      return;
+  if (!perm.ok) {
+    if (perm.reason === "login") {
+      return setOrderError("Please sign in to place an order.");
     }
 
-    setOrdering(true);
-
-    try {
-      const res = await fetch(ORDER_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          itemId: item._id || item.id,
-          deliveryAddress: deliveryAddress.trim() || "",
-        }),
-      });
-
-      const json = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        return setOrderError(
-          json.error || json.message || "Could not place the order."
-        );
-      }
-
-      setOrderSuccess(true);
-    } catch (error) {
-      setOrderError("Something went wrong. Please try again.");
-    } finally {
-      setOrdering(false);
+    if (perm.reason === "admin") {
+      return setOrderError("Admins cannot place customer orders.");
     }
-  };
 
+    if (perm.reason === "own") {
+      return setOrderError("You cannot order your own items.");
+    }
+
+    return;
+  }
+
+  if (!deliveryAddress.trim()) {
+    return setOrderError("Please enter your delivery address.");
+  }
+
+  setOrdering(true);
+
+  try {
+    const res = await fetch(ORDER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        itemId: item._id || item.id,
+        itemName: item.name,
+        itemImage: item.image || item.images?.[0] || "",
+        price: Number(item.price || 0),
+        category: item.category || "",
+        description: item.description || "",
+        location: item.location || "",
+        vendorId: item.userId || item.vendorId || null,
+        vendorName:
+          item.vendorName ||
+          item.userName ||
+          item.vendor?.name ||
+          item.user?.name ||
+          "Vendor",
+        status: "Pending",
+        customerId: currentUser._id || currentUser.id,
+        customerEmail: currentUser.email,
+        customerName: currentUser.name,
+        deliveryAddress: deliveryAddress.trim(),
+      }),
+    });
+
+    const json = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      return setOrderError(
+        json.error || json.message || "Could not place the order."
+      );
+    }
+
+    setOrderSuccess(true);
+  } catch (error) {
+    setOrderError("Something went wrong. Please try again.");
+  } finally {
+    setOrdering(false);
+  }
+};
   const disabled =
     ordering ||
     !currentUser ||
@@ -161,8 +174,7 @@ export function ItemDetailsDialog({ item }) {
       String(item?.vendorId) === String(currentUser.id)) ||
     isPending;
 
-  // Wait until the component mounts in the browser
-  if (!mounted || !item) return null;
+  if (!item) return null;
 
   return createPortal(
     <div
