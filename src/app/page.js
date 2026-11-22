@@ -39,18 +39,13 @@ export default function Home() {
           {/* Buttons */}
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <a
-              href="/menu"
+              href="/Browse-Menu"
               className="rounded-full bg-brand px-9 py-3.5 text-sm font-medium text-white shadow-lg shadow-brand/30 transition hover:bg-brand-dark"
             >
               View Menu
             </a>
 
-            <a
-              href="/book-table"
-              className="rounded-full bg-white px-9 py-3.5 text-sm font-medium text-zinc-900 shadow-sm ring-1 ring-zinc-200/70 transition hover:bg-zinc-50"
-            >
-              Book A Table
-            </a>
+          
           </div>
 
           {/* Reviews */}
