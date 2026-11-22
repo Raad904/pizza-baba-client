@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, LogOut, Menu, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/imeges/logo.png";
@@ -11,8 +11,9 @@ import { authClient } from "@/lib/auth-client";
 
 
 
-const NavberPage = () => {
+const NavberPage = ({ hideOnDashboard = true }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -46,6 +47,12 @@ const NavberPage = () => {
     router.push("/");
     router.refresh();
   };
+
+  // The root navbar is hidden on dashboard routes — the dashboard layout
+  // renders its own instance inside the column right of the sidebar.
+  if (hideOnDashboard && pathname?.startsWith("/dashboard")) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-cream/80 backdrop-blur-md">
