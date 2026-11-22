@@ -11,10 +11,15 @@ import {
 } from "lucide-react";
 
 /* ============================================================
- * DATA FETCHING PLACEHOLDER — add your server URL later, e.g.:
- *   const OVERVIEW_URL = `${process.env.NEXT_PUBLIC_API_URL}/admin/overview`;
+ * Same URLs the admin pages use:
+ *   manageUsers  -> GET `${NEXT_PUBLIC_API_URL}/user`
+ *   manageMenu   -> GET `${NEXT_PUBLIC_API_URL}/items`
+ *   transactions -> GET `${NEXT_PUBLIC_API_URL}/admin/transactions`
+ *                  (documented endpoint in transactions/page.jsx)
  * ============================================================ */
-const OVERVIEW_URL = `${process.env.NEXT_PUBLIC_API_URL}/user`; // 👈 leave empty for now
+const USERS_URL = `${process.env.NEXT_PUBLIC_API_URL}/user`;
+const ITEMS_URL = `${process.env.NEXT_PUBLIC_API_URL}/items`;
+const TRANSACTIONS_URL = `${process.env.NEXT_PUBLIC_API_URL}/admin/transactions`;
 
 const cards = [
   { key: "totalUsers", label: "Total Registered Users", icon: Users, color: "text-zinc-700" },
@@ -25,21 +30,64 @@ const cards = [
   { key: "totalTransactions", label: "Total Transactions", icon: ArrowLeftRight, color: "text-violet-600" },
 ];
 
+// Same response shapes the pages accept: [] or { [key]: [] }
+const toList = (data, key) =>
+  Array.isArray(data) ? data : Array.isArray(data?.[key]) ? data[key] : [];
+
+const fetchList = (url, key) =>
+  fetch(url, { cache: "no-store" })
+    .then((res) => {
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      return res.json();
+    })
+    .then((data) => toList(data, key));
+
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // ⚠️ Placeholder not filled in yet — nothing to fetch
-    if (!OVERVIEW_URL) return;
+    let cancelled = false;
 
-    fetch(OVERVIEW_URL)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) setError(data.error);
-        else setStats(data);
+    Promise.allSettled([
+      fetchList(USERS_URL, "users"),
+      fetchList(ITEMS_URL, "items"),
+      fetchList(TRANSACTIONS_URL, "transactions"),
+    ])
+      .then((results) => {
+        if (cancelled) return;
+
+        // Only fail if every source is unreachable
+        if (results.every((r) => r.status === "rejected")) {
+          setError("Could not load overview.");
+          return;
+        }
+
+        const valueAt = (i) =>
+          results[i].status === "fulfilled" ? results[i].value : [];
+
+        const users = valueAt(0);
+        const items = valueAt(1);
+        const transactions = valueAt(2);
+
+        setStats({
+          totalUsers: users.length,
+          totalVendors: users.filter((u) => u.role === "vendor").length,
+          totalCustomers: users.filter((u) => u.role === "customer").length,
+          totalMenuItems: items.length,
+          pendingMenuItems: items.filter(
+            (item) => String(item.status || "") === "Pending"
+          ).length,
+          totalTransactions: transactions.length,
+        });
       })
-      .catch(() => setError("Could not load overview."));
+      .catch(() => {
+        if (!cancelled) setError("Could not load overview.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -49,14 +97,6 @@ export default function AdminOverviewPage() {
         Overview of your platform
       </p>
 
-      {/* Placeholder hint — remove once OVERVIEW_URL is configured */}
-      {!OVERVIEW_URL && (
-        <p className="mt-6 rounded-xl bg-zinc-50 px-4 py-3 text-sm text-zinc-500 ring-1 ring-zinc-100">
-          Data endpoint is not configured yet — add your server URL in{" "}
-          <code className="font-mono text-zinc-700">dashboard/admin/page.jsx</code>.
-        </p>
-      )}
-
       {error && (
         <p className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
           {error}
@@ -64,7 +104,7 @@ export default function AdminOverviewPage() {
       )}
 
       {/* Loading skeleton */}
-      {!stats && OVERVIEW_URL && !error && (
+      {!stats && !error && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
             <div key={c.key} className="h-28 animate-pulse rounded-2xl bg-zinc-100" />

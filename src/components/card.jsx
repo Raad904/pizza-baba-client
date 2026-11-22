@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Store } from "lucide-react";
 
+const isExternalUrl = (url) => typeof url === "string" && url.startsWith("http");
+
 const DishCard = ({
   id,
   name,
@@ -93,6 +95,7 @@ const DishCard = ({
             alt={name}
             width={200}
             height={200}
+            unoptimized={isExternalUrl(img)}
             className="size-36 rounded-full object-cover transition-transform duration-300 group-hover:scale-105 sm:size-40"
           />
         </div>

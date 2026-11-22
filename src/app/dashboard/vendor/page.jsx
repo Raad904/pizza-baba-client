@@ -10,13 +10,17 @@ import {
   Crown,
   PlusCircle,
   ClipboardList,
+  ShoppingBag,
+  XCircle,
 } from "lucide-react";
 
 const cards = [
   { key: "totalItems", label: "Total Menu Items", icon: Package, color: "text-zinc-700" },
   { key: "activeItems", label: "Active Menu Items", icon: CheckCircle2, color: "text-emerald-600" },
+  { key: "totalOrders", label: "Total Customer Orders", icon: ShoppingBag, color: "text-violet-600" },
   { key: "pendingOrders", label: "Pending Customer Orders", icon: Clock, color: "text-amber-600" },
   { key: "acceptedOrders", label: "Accepted Orders", icon: CircleCheck, color: "text-sky-600" },
+  { key: "rejectedOrders", label: "Rejected Orders", icon: XCircle, color: "text-red-500" },
 ];
 
 export default function VendorOverviewPage() {
@@ -24,13 +28,28 @@ export default function VendorOverviewPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
+
     fetch("/api/vendor/overview")
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) setError(data.error);
-        else setStats(data);
+        if (!cancelled) {
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setStats(data);
+          }
+        }
       })
-      .catch(() => setError("Could not load overview."));
+      .catch(() => {
+        if (!cancelled) {
+          setError("Could not load overview.");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -43,7 +62,7 @@ export default function VendorOverviewPage() {
       )}
 
       {!stats && !error && (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
             <div key={c.key} className="h-28 animate-pulse rounded-2xl bg-zinc-100" />
           ))}
@@ -52,7 +71,7 @@ export default function VendorOverviewPage() {
 
       {stats && (
         <>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((c) => (
               <div
                 key={c.key}

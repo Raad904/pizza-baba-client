@@ -1,10 +1,13 @@
-
 "use client";
 
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { BadgePercent, Star } from "lucide-react";
 
 import DishCarousel from "@/components/DishCarousel";
+import CategorySection from "@/components/CategorySection";
+import WhyChooseSection from "@/components/WhyChooseSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
 
 import heroImage from "@/app/imeges/pepperoni-pizza-slice.png.png";
 
@@ -17,10 +20,14 @@ const avatars = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-cream">
-  
 
       {/* ===== Hero Section ===== */}
-      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-24 pt-10 sm:px-8 lg:grid-cols-2 lg:gap-6 lg:pt-16">
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-24 pt-10 sm:px-8 lg:grid-cols-2 lg:gap-6 lg:pt-16"
+      >
 
         {/* Left — Copy */}
         <div className="max-w-xl">
@@ -123,10 +130,26 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      {/* ===== Dish Carousel ===== */}
-      <DishCarousel />
+      {/* ===== Dish Carousel (Featured Menu Items) ===== */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="mx-auto max-w-6xl px-5 pb-20 sm:px-8"
+      >
+        <DishCarousel />
+      </motion.section>
+
+      {/* ===== Explore by Category ===== */}
+      <CategorySection />
+
+      {/* ===== Why Choose PizzaHub? ===== */}
+      <WhyChooseSection />
+
+      {/* ===== Customer Testimonials ===== */}
+      <TestimonialsSection />
 
     </main>
   );
