@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/orders`;
 
@@ -151,6 +152,10 @@ export default function CustomerOrdersPage() {
             : order
         )
       );
+
+      toast.success("Order cancelled.", {
+        description: "Your order has been cancelled.",
+      });
     } catch (err) {
       console.error("Cancel Order Error:", err);
 
@@ -158,6 +163,9 @@ export default function CustomerOrdersPage() {
         err.message ||
           "Something went wrong. Please try again."
       );
+      toast.error("Could not cancel the order.", {
+        description: err.message,
+      });
     } finally {
       setCancelling(null);
     }

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import EditDialog from "@/components/EditDialog";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 /* ============================================================
  * API URL PLACEHOLDER — add your server URL later, e.g.:
@@ -127,8 +128,15 @@ useEffect(() => {
       setItems((prev) =>
         prev.filter((i) => i._id !== item._id)
       );
+
+      toast.success("Menu item deleted.", {
+        description: `"${item.name}" has been removed.`,
+      });
     } catch (error) {
       setError(error.message);
+      toast.error("Could not delete the item.", {
+        description: error.message,
+      });
     } finally {
       setBusyId(null);
     }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ImagePlus } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 const CATEGORIES = [
   "Margherita Pizza",
@@ -126,6 +127,10 @@ const handleSubmit = async (e) => {
     }
 
     form.reset();
+
+    toast.success("Menu item created!", {
+      description: "It will appear once an admin approves it.",
+    });
 
     router.push("/dashboard/vendor/menuItem");
 

@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // Backend API URLs
 const ITEMS_URL = `${process.env.NEXT_PUBLIC_API_URL}/items`;
@@ -263,12 +264,18 @@ export default function ManageMenuItemsPage() {
       );
 
       setNotice(`"${item.name}" deleted.`);
+      toast.success("Menu item deleted.", {
+        description: `"${item.name}" has been removed.`,
+      });
     } catch (err) {
       console.error("Delete Menu Item Error:", err);
 
       setError(
         err.message || "Something went wrong."
       );
+      toast.error("Could not delete the item.", {
+        description: err.message,
+      });
     } finally {
       setBusyId(null);
     }

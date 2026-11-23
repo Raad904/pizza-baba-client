@@ -14,6 +14,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 const ORDER_URL = `${process.env.NEXT_PUBLIC_API_URL}/orders`;
 
@@ -169,6 +170,9 @@ export function ItemDetailsDialog({ item }) {
     }
 
     setOrderSuccess(true);
+    toast.success("Order placed successfully!", {
+      description: "Taking you to Browse Menu…",
+    });
 
     // Brief confirmation, then send the customer to the Browse Menu page.
     redirectTimer.current = setTimeout(() => {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Pizza, Upload } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 /* Big "shield" shape from the reference: rounded top, wide curved bottom */
 const shield = {
@@ -162,6 +163,10 @@ export default function AuthSection({ title, mode, fields, footer }) {
           showError(res.error.message || "Could not create the account.");
           return;
         }
+
+        toast.success("Account created successfully!", {
+          description: "You can now sign in with your credentials.",
+        });
       } else {
         const res = await authClient.signIn.email({
           email: data.email,
@@ -172,6 +177,10 @@ export default function AuthSection({ title, mode, fields, footer }) {
           showError(res.error.message || "Invalid email or password.");
           return;
         }
+
+        toast.success("Logged in successfully!", {
+          description: `Welcome back, ${res.data?.user?.name || data.email}.`,
+        });
       }
 
       router.push("/");

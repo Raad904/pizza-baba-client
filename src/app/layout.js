@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 import NavberPage from "@/components/Navber";
 import Footer from "@/components/Footer";
 
@@ -35,6 +36,8 @@ export default function RootLayout({ children }) {
         {children}
         </main>
         <Footer />
+        {/* Toast notifications (top-right) for delete / create / login / order */}
+        <Toaster position="top-right" richColors closeButton />
         </body>
     </html>
   );
