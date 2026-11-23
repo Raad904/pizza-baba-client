@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DishCard from "./card";
+import { isApprovedItem } from "@/lib/utils";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/items`;
 
@@ -27,7 +28,9 @@ const DishGrid = () => {
 
         const data = await response.json();
 
-        setDishes(Array.isArray(data) ? data : data.items || []);
+        // Only admin-approved items are shown on the Home page.
+        const items = Array.isArray(data) ? data : data.items || [];
+        setDishes(items.filter((item) => isApprovedItem(item)));
       } catch (err) {
         console.error("Fetch Dishes Error:", err);
         setError(err.message || "Something went wrong.");

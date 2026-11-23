@@ -5,25 +5,9 @@ import { useRouter } from "next/navigation";
 import { Search, MapPin, UtensilsCrossed, RefreshCw } from "lucide-react";
 import DishCard from "@/components/card";
 import { authClient } from "@/lib/auth-client";
+import { isApprovedItem } from "@/lib/utils";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/items`;
-
-const isApproved = (item) =>
-    String(item.status || "").toLowerCase() === "approved";
-
-const isActive = (item) => {
-    // Support common active/availability field names.
-    if (typeof item.isActive === "boolean") return item.isActive;
-    if (typeof item.active === "boolean") return item.active;
-    if (typeof item.available === "boolean") return item.available;
-
-    if (typeof item.availability === "string") {
-        return item.availability.toLowerCase() === "active";
-    }
-
-    // Existing records without an active field are treated as active.
-    return true;
-};
 
 export default function BrowseMenuPage() {
     const router = useRouter();
@@ -64,12 +48,11 @@ export default function BrowseMenuPage() {
         fetchItems();
     }, []);
 
-    //   const approvedItems = useMemo(
-    //     () => items.filter((item) => isApproved(item) && isActive(item)),
-    //     [items]
-    //   );
-    // Temporarily show all menu items without status filtering
-    const approvedItems = useMemo(() => items, [items]);
+    // Only admin-approved items are visible to customers.
+    const approvedItems = useMemo(
+        () => items.filter((item) => isApprovedItem(item)),
+        [items]
+    );
 
     const categories = useMemo(
         () => [...new Set(approvedItems.map((item) => item.category).filter(Boolean))],

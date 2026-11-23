@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -59,6 +59,12 @@ export function ItemDetailsDialog({ item }) {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [deliveryAddress, setDeliveryAddress] = useState("");
+
+  const redirectTimer = useRef(null);
+
+  // Cancel a pending post-order redirect if the dialog unmounts early
+  // (e.g. the customer closes it themselves).
+  useEffect(() => () => clearTimeout(redirectTimer.current), []);
 
   const images =
     Array.isArray(item?.images) && item.images.length > 0
@@ -163,6 +169,11 @@ export function ItemDetailsDialog({ item }) {
     }
 
     setOrderSuccess(true);
+
+    // Brief confirmation, then send the customer to the Browse Menu page.
+    redirectTimer.current = setTimeout(() => {
+      router.push("/Browse-Menu");
+    }, 1200);
   } catch (error) {
     setOrderError("Something went wrong. Please try again.");
   } finally {
@@ -171,6 +182,7 @@ export function ItemDetailsDialog({ item }) {
 };
   const disabled =
     ordering ||
+    orderSuccess ||
     !currentUser ||
     currentUser.role === "admin" ||
     (currentUser.role === "vendor" &&
@@ -310,7 +322,7 @@ export function ItemDetailsDialog({ item }) {
           {orderSuccess && (
             <div className="flex items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 ring-1 ring-emerald-100 mb-4">
               <CheckCircle className="size-5 shrink-0" />
-              <span>Order placed successfully!</span>
+              <span>Order placed successfully! Taking you to Browse Menu…</span>
             </div>
           )}
 
@@ -370,6 +382,11 @@ export function ItemDetailsDialog({ item }) {
                     <span className="flex items-center justify-center">
                       <Loader2 className="size-4 mr-2 animate-spin" />
                       Placing order...
+                    </span>
+                  ) : orderSuccess ? (
+                    <span className="flex items-center justify-center">
+                      <Loader2 className="size-4 mr-2 animate-spin" />
+                      Redirecting...
                     </span>
                   ) : (
                     "Place Order"

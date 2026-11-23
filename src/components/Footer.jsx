@@ -165,7 +165,7 @@ export default function Footer() {
             &copy; 2026 Pizza Baba. All rights reserved.
           </p>
           <div className="flex gap-4 text-sm text-zinc-500">
-            <span>Made with ❤️ in Dhaka</span>
+            <span>Made by Raad </span>
           </div>
         </div>
       </motion.div>

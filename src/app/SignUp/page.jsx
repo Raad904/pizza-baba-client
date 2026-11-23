@@ -27,7 +27,8 @@ export default function SignUpPage() {
               options: [
                 { value: "customer", label: "Customer" },
                 { value: "vendor", label: "Vendor" },
-                { value: "admin", label: "Admin" },
+                // No "Admin" option — the single admin account is seeded
+                // via scripts/seed-admin.mjs (raad73575@gmail.com).
               ],
             },
           ]}

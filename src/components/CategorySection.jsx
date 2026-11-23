@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import DishCard from "./card";
+import { isApprovedItem } from "@/lib/utils";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/items`;
 const MAX_CARDS = 6;
@@ -119,7 +120,8 @@ export default function CategorySection() {
             ? data.items
             : [];
 
-        setDishes(items);
+        // Only admin-approved items feed the Home categories and cards.
+        setDishes(items.filter((item) => isApprovedItem(item)));
       } catch (err) {
         console.error("Fetch Categories Error:", err);
         setError(err.message || "Something went wrong.");

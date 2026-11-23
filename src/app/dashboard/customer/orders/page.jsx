@@ -32,7 +32,7 @@ export default function CustomerOrdersPage() {
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(null);
 
-  // Fetch customer orders using customerUserId
+  // Fetch customer orders
   useEffect(() => {
     if (isPending) return;
 
@@ -50,17 +50,17 @@ export default function CustomerOrdersPage() {
         setError("");
 
         const response = await fetch(
-          `${API_URL}/customer/${encodeURIComponent(currentUser.id)}`,
+          `${API_URL}/customer/${encodeURIComponent(
+            currentUser.id
+          )}`,
           {
             method: "GET",
             cache: "no-store",
           }
         );
-        console.log(response);
-        
-        
-        const contentType = response.headers.get("content-type");
-        console.log('from console log',contentType);
+
+        const contentType =
+          response.headers.get("content-type");
 
         if (!contentType?.includes("application/json")) {
           const responseText = await response.text();
@@ -81,12 +81,16 @@ export default function CustomerOrdersPage() {
         }
 
         if (!cancelled) {
-          setOrders(Array.isArray(data.orders) ? data.orders : []);
+          setOrders(
+            Array.isArray(data.orders) ? data.orders : []
+          );
         }
       } catch (err) {
         if (!cancelled) {
           console.error("Customer Orders Error:", err);
-          setError(err.message || "Something went wrong.");
+          setError(
+            err.message || "Something went wrong."
+          );
         }
       } finally {
         if (!cancelled) {
@@ -104,7 +108,11 @@ export default function CustomerOrdersPage() {
 
   // Cancel order
   const cancelOrder = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this order?")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel this order?"
+      )
+    ) {
       return;
     }
 
@@ -112,29 +120,44 @@ export default function CustomerOrdersPage() {
     setError("");
 
     try {
-      const response = await fetch(`${API_URL}/${orderId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/${encodeURIComponent(orderId)}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.error || "Could not cancel the order.");
+        throw new Error(
+          data.error || "Could not cancel the order."
+        );
       }
 
+      // Update order using backend response
       setOrders((previousOrders) =>
         previousOrders.map((order) =>
           order._id === orderId
-            ? { ...order, status: "cancelled" }
+            ? {
+                ...order,
+                ...(data.order || {}),
+                status:
+                  data.order?.status || "Cancelled",
+              }
             : order
         )
       );
     } catch (err) {
       console.error("Cancel Order Error:", err);
-      setError(err.message || "Something went wrong. Please try again.");
+
+      setError(
+        err.message ||
+          "Something went wrong. Please try again."
+      );
     } finally {
       setCancelling(null);
     }
@@ -145,7 +168,7 @@ export default function CustomerOrdersPage() {
     return (
       <main className="min-h-screen bg-zinc-50 p-6">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-bold text-zinc-900 mb-6">
+          <h1 className="mb-6 text-2xl font-bold text-zinc-900">
             My Orders
           </h1>
 
@@ -153,7 +176,7 @@ export default function CustomerOrdersPage() {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="h-64 rounded-2xl bg-zinc-100 animate-pulse"
+                className="h-64 animate-pulse rounded-2xl bg-zinc-100"
               />
             ))}
           </div>
@@ -167,11 +190,11 @@ export default function CustomerOrdersPage() {
     return (
       <main className="min-h-screen bg-zinc-50 p-6">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-bold text-zinc-900 mb-6">
+          <h1 className="mb-6 text-2xl font-bold text-zinc-900">
             My Orders
           </h1>
 
-          <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-zinc-100 text-center">
+          <div className="rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-zinc-100">
             <p className="text-sm text-zinc-500">
               Please sign in to view your orders.
             </p>
@@ -184,9 +207,9 @@ export default function CustomerOrdersPage() {
   // Error
   if (error && orders.length === 0) {
     return (
-      <main className="min-h-screen bg-zinc-50 p-6 flex items-center justify-center">
-        <div className="rounded-2xl bg-red-50 p-8 text-center shadow-sm ring-1 ring-red-100 max-w-md w-full">
-          <AlertCircle className="mx-auto size-12 text-red-600 mb-3" />
+      <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-6">
+        <div className="w-full max-w-md rounded-2xl bg-red-50 p-8 text-center shadow-sm ring-1 ring-red-100">
+          <AlertCircle className="mx-auto mb-3 size-12 text-red-600" />
 
           <h2 className="text-lg font-bold text-red-800">
             Could not load orders
@@ -212,12 +235,12 @@ export default function CustomerOrdersPage() {
     return (
       <main className="min-h-screen bg-zinc-50 p-6">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-bold text-zinc-900 mb-6">
+          <h1 className="mb-6 text-2xl font-bold text-zinc-900">
             My Orders
           </h1>
 
-          <div className="rounded-2xl bg-white p-12 shadow-sm ring-1 ring-zinc-100 text-center">
-            <Clock className="mx-auto size-12 text-zinc-300 mb-4" />
+          <div className="rounded-2xl bg-white p-12 text-center shadow-sm ring-1 ring-zinc-100">
+            <Clock className="mx-auto mb-4 size-12 text-zinc-300" />
 
             <h3 className="text-lg font-bold text-zinc-900">
               No orders yet
@@ -236,13 +259,14 @@ export default function CustomerOrdersPage() {
   return (
     <main className="min-h-screen bg-zinc-50 p-6">
       <div className="mx-auto max-w-4xl">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-zinc-900">
             My Orders
           </h1>
 
           <p className="text-sm text-zinc-500">
-            {orders.length} order{orders.length !== 1 ? "s" : ""}
+            {orders.length} order
+            {orders.length !== 1 ? "s" : ""}
           </p>
         </div>
 
@@ -259,13 +283,17 @@ export default function CustomerOrdersPage() {
               ? new Date(order.createdAt).toLocaleDateString()
               : "—";
 
+            const status = String(
+              order.status || "Pending"
+            ).toLowerCase();
+
             return (
               <li
                 key={order._id}
                 className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-100"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-[150px]">
+                  <div className="flex min-w-[150px] items-center gap-3">
                     {order.itemImage && (
                       <Image
                         src={order.itemImage}
@@ -278,11 +306,11 @@ export default function CustomerOrdersPage() {
                     )}
 
                     <div className="min-w-0">
-                      <p className="font-semibold text-zinc-900 leading-tight">
+                      <p className="font-semibold leading-tight text-zinc-900">
                         {order.itemName || "Unnamed Item"}
                       </p>
 
-                      <p className="text-sm text-zinc-500 truncate">
+                      <p className="truncate text-sm text-zinc-500">
                         {order.vendorName || "Unknown vendor"}
                       </p>
                     </div>
@@ -290,7 +318,7 @@ export default function CustomerOrdersPage() {
 
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-bold capitalize ${
-                      STATUS_STYLES[order.status?.toLowerCase()] ||
+                      STATUS_STYLES[status] ||
                       STATUS_STYLES.pending
                     }`}
                   >
@@ -300,7 +328,7 @@ export default function CustomerOrdersPage() {
 
                 <div className="mt-4 grid gap-2 text-sm text-zinc-600 sm:grid-cols-2">
                   <p className="flex items-center gap-2">
-                    <Store className="size-4 text-zinc-400" />
+                    <Store className="size-4 shrink-0 text-zinc-400" />
 
                     <span className="font-medium text-zinc-900">
                       {order.vendorName || "Unknown vendor"}
@@ -308,7 +336,7 @@ export default function CustomerOrdersPage() {
                   </p>
 
                   <p className="flex items-center gap-2">
-                    <CalendarDays className="size-4 text-zinc-400" />
+                    <CalendarDays className="size-4 shrink-0 text-zinc-400" />
 
                     <span className="font-medium text-zinc-900">
                       {requestDate}
@@ -316,28 +344,28 @@ export default function CustomerOrdersPage() {
                   </p>
 
                   <p className="flex items-center gap-2">
-                    <MapPin className="size-4 text-zinc-400" />
+                    <MapPin className="size-4 shrink-0 text-zinc-400" />
 
-                    <span className="font-medium text-zinc-900 truncate">
+                    <span className="truncate font-medium text-zinc-900">
                       {order.deliveryAddress || "—"}
                     </span>
                   </p>
-
                 </div>
 
-                {order.status?.toLowerCase() === "pending" && (
-                  <div className="mt-4 pt-4 border-t border-zinc-100">
+                {/* Cancel only pending orders */}
+                {status === "pending" && (
+                  <div className="mt-4 border-t border-zinc-100 pt-4">
                     <button
                       type="button"
                       disabled={cancelling === order._id}
                       onClick={() => cancelOrder(order._id)}
-                      className="inline-flex items-center gap-2 rounded-full bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 rounded-full bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {cancelling === order._id ? (
-                        <span className="flex items-center gap-2">
+                        <>
                           <Loader2 className="size-4 animate-spin" />
                           Cancelling...
-                        </span>
+                        </>
                       ) : (
                         <>
                           <Trash2 className="size-4" />
