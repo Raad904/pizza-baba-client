@@ -13,18 +13,24 @@ export const auth = betterAuth({
     client,
   }),
 
-   emailAndPassword: { 
-    enabled: true, 
-  }, 
+  emailAndPassword: {
+    enabled: true,
+  },
 
 
-   user: {
+  user: {
     additionalFields: {
       role: {
         type: "string",
         input: true,
         required: true,
         defaultValue: "customer",
+      },
+
+      status: {
+        type: "string",
+        defaultValue: "unblock",
+        input: false,
       },
       // "free" | "premium" — never settable from the client (input omitted).
       subscription: {
@@ -57,10 +63,10 @@ export const auth = betterAuth({
     },
   },
 
-  socialProviders: { 
-    github: { 
-      clientId: process.env.GITHUB_CLIENT_ID , 
-      clientSecret: process.env.GITHUB_CLIENT_SECRET , 
-    }, 
+  socialProviders: {
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    },
   },
 });
