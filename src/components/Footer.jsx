@@ -14,7 +14,7 @@ const footerVariants = {
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Browse Menu", href: "/Browse-Menu" },
-  { label: "Book a Table", href: "/book-table" },
+
   { label: "Dashboard", href: "/dashboard/customer" },
 ];
 
