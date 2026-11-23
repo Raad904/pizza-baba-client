@@ -311,7 +311,7 @@ export default function CustomerOrdersPage() {
                     <CalendarDays className="size-4 text-zinc-400" />
 
                     <span className="font-medium text-zinc-900">
-                      {order.deliveryDate || "—"}
+                      {requestDate}
                     </span>
                   </p>
 
@@ -323,13 +323,6 @@ export default function CustomerOrdersPage() {
                     </span>
                   </p>
 
-                  <p className="flex items-center gap-2">
-                    <Clock className="size-4 text-zinc-400" />
-
-                    <span className="font-medium text-zinc-900">
-                      {requestDate}
-                    </span>
-                  </p>
                 </div>
 
                 {order.status?.toLowerCase() === "pending" && (

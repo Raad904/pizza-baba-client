@@ -239,7 +239,7 @@ export default function VendorOrdersPage() {
 
                   <p className="flex items-center gap-2">
                     <CalendarDays className="size-4 shrink-0 text-zinc-400" />
-                    Delivery: {order.deliveryDate || "—"}
+                    Delivery: {order.deliveryDate || "Within 24 hours"}
                   </p>
 
                   <p className="flex items-center gap-2">

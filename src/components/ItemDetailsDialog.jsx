@@ -144,6 +144,9 @@ export function ItemDetailsDialog({ item }) {
           item.user?.name ||
           "Vendor",
         status: "Pending",
+        // UTC ISO string captured at submission time. The server re-stamps
+        // this authoritatively when it saves the order.
+        createdAt: new Date().toISOString(),
         customerId: currentUser._id || currentUser.id,
         customerEmail: currentUser.email,
         customerName: currentUser.name,
